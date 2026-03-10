@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home Loan EMI Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: #f5f5f5;
+      padding: 30px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1300px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    .left-section {
+      padding: 40px 50px;
+      background: #fafafa;
+    }
+
+    .right-section {
+      padding: 40px 50px;
+      background: #edf6f6;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .field-group {
+      margin-bottom: 35px;
+    }
+
+    label {
+      display: block;
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    input, select {
+      width: 100%;
+      border: none;
+      border-bottom: 2px solid #d6d6d6;
+      background: transparent;
+      font-size: 22px;
+      padding: 10px 0;
+      outline: none;
+      color: #333;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+    }
+
+    .btn {
+      margin-top: 20px;
+      width: 100%;
+      background: #e31e24;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .btn:hover {
+      background: #c8181d;
+    }
+
+    .result-title {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: #333;
+      text-align: center;
+    }
+
+    .result-title span {
+      font-weight: 700;
+      margin-left: 10px;
+    }
+
+    .chart-and-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 50px;
+      flex-wrap: wrap;
+    }
+
+    .donut-wrap {
+      width: 220px;
+      height: 220px;
+      position: relative;
+    }
+
+    .donut {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: conic-gradient(#0b9d8a 0deg, #0b9d8a 220deg, #f4c32f 220deg, #f4c32f 360deg);
+      position: relative;
+    }
+
+    .donut::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 105px;
+      height: 105px;
+      background: #edf6f6;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+
+    .color-box {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      margin-top: 4px;
+      flex-shrink: 0;
+    }
+
+    .green {
+      background: #0b9d8a;
+    }
+
+    .yellow {
+      background: #f4c32f;
+    }
+
+    .legend-text .label {
+      font-size: 18px;
+      color: #555;
+      margin-bottom: 6px;
+    }
+
+    .legend-text .value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .bottom-line {
+      margin-top: 35px;
+      border-top: 2px solid #c9d9dc;
+      padding-top: 20px;
+      text-align: center;
+      font-size: 16px;
+      color: #666;
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+
+      .row {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .left-section,
+      .right-section {
+        padding: 30px 25px;
+      }
+
+      .result-title {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-section">
+      <div class="field-group">
+        <label for="loanAmount">Loan Amount</label>
+        <input type="number" id="loanAmount" value="4000000" />
+      </div>
+
+      <div class="row">
+        <div class="field-group">
+          <label for="loanTenure">Loan Tenure</label>
+          <select id="loanTenure">
+            <option value="5">5 yrs</option>
+            <option value="10" selected>10 yrs</option>
+            <option value="15">15 yrs</option>
+            <option value="20">20 yrs</option>
+            <option value="25">25 yrs</option>
+            <option value="30">30 yrs</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="interestRate">Interest Rate % (p.a.)</label>
+          <input type="number" id="interestRate" value="10" step="0.1" />
+        </div>
+      </div>
+
+      <button class="btn" onclick="updateCalculator()">Recalculate Your EMI</button>
+    </div>
+
+    <div class="right-section">
+      <div class="result-title">
+        You are Eligible for EMI Amount <span id="emiAmount">₹52,860</span>
+      </div>
+
+      <div class="chart-and-info">
+        <div class="donut-wrap">
+          <div class="donut" id="donutChart"></div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <div class="color-box green"></div>
+            <div class="legend-text">
+              <div class="label">Principal Amount</div>
+              <div class="value" id="principalAmount">₹40,00,000</div>
+            </div>
+          </div>
+
+          <div class="legend-item">
+            <div class="color-box yellow"></div>
+            <div class="legend-text">
+              <div class="label">Interest Amount</div>
+              <div class="value" id="interestAmount">₹23,43,236</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-line" id="totalPayment">
+        Total Payment: ₹63,43,236
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatINR(number) {
+      return "₹" + Number(number).toLocaleString("en-IN", {
+        maximumFractionDigits: 0
+      });
+    }
+
+    function calculateEMI(principal, annualRate, years) {
+      const monthlyRate = annualRate / 12 / 100;
+      const months = years * 12;
+
+      if (monthlyRate === 0) {
+        const emi = principal / months;
+        return {
+          emi,
+          totalPayment: emi * months,
+          totalInterest: 0
+        };
+      }
+
+      const emi =
+        (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+        (Math.pow(1 + monthlyRate, months) - 1);
+
+      const totalPayment = emi * months;
+      const totalInterest = totalPayment - principal;
+
+      return {
+        emi,
+        totalPayment,
+        totalInterest
+      };
+    }
+
+    function updateCalculator() {
+      const principal = parseFloat(document.getElementById("loanAmount").value) || 0;
+      const years = parseFloat(document.getElementById("loanTenure").value) || 0;
+      const annualRate = parseFloat(document.getElementById("interestRate").value) || 0;
+
+      const result = calculateEMI(principal, annualRate, years);
+
+      document.getElementById("emiAmount").textContent = formatINR(result.emi);
+      document.getElementById("principalAmount").textContent = formatINR(principal);
+      document.getElementById("interestAmount").textContent = formatINR(result.totalInterest);
+      document.getElementById("totalPayment").textContent =
+        "Total Payment: " + formatINR(result.totalPayment);
+
+      const principalPercent = result.totalPayment > 0 ? (principal / result.totalPayment) * 360 : 0;
+      const interestPercent = 360 - principalPercent;
+
+      document.getElementById("donutChart").style.background =
+        `conic-gradient(
+          #0b9d8a 0deg,
+          #0b9d8a ${principalPercent}deg,
+          #f4c32f ${principalPercent}deg,
+          #f4c32f 360deg
+        )`;
+    }
+
+    updateCalculator();
+  </script>
+</body>
+</html>
