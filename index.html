@@ -95,8 +95,21 @@
     <div class="calculator-card">
       <div class="left-section">
         <div class="field-group">
+          <label for="calculationMode">Calculation Type</label>
+          <select id="calculationMode" onchange="handleModeChange()">
+            <option value="loan" selected>Calculate EMI from Loan Amount</option>
+            <option value="emi">Calculate Loan Amount from EMI</option>
+          </select>
+        </div>
+
+        <div class="field-group" id="loanAmountGroup">
           <label for="loanAmount">Loan Amount</label>
           <input type="number" id="loanAmount" value="4000000" />
+        </div>
+
+        <div class="field-group" id="desiredEmiGroup" style="display: none;">
+          <label for="desiredEmi">Desired EMI</label>
+          <input type="number" id="desiredEmi" value="52860" />
         </div>
 
         <div class="row">
@@ -118,7 +131,7 @@
           </div>
         </div>
 
-        <button class="btn" onclick="updateCalculator()">Recalculate Your EMI</button>
+        <button class="btn" onclick="updateCalculator()">Recalculate</button>
       </div>
 
       <div class="right-section">
@@ -206,6 +219,30 @@
       return { emi, totalPayment, totalInterest };
     }
 
+    function calculateLoanFromEMI(emi, annualRate, years) {
+      const monthlyRate = annualRate / 12 / 100;
+      const months = years * 12;
+
+      if (months === 0) {
+        return 0;
+      }
+
+      if (monthlyRate === 0) {
+        return emi * months;
+      }
+
+      const numerator = emi * (Math.pow(1 + monthlyRate, months) - 1);
+      const denominator = monthlyRate * Math.pow(1 + monthlyRate, months);
+      return numerator / denominator;
+    }
+
+    function handleModeChange() {
+      const mode = document.getElementById('calculationMode').value;
+      document.getElementById('loanAmountGroup').style.display = mode === 'loan' ? 'block' : 'none';
+      document.getElementById('desiredEmiGroup').style.display = mode === 'emi' ? 'block' : 'none';
+      updateCalculator();
+    }
+
     function generateAmortizationSchedule(principal, annualRate, years) {
       const monthlyRate = annualRate / 12 / 100;
       const months = years * 12;
@@ -282,12 +319,26 @@
     }
 
     function updateCalculator() {
-      const principal = parseFloat(document.getElementById('loanAmount').value) || 0;
+      const mode = document.getElementById('calculationMode').value;
       const years = parseFloat(document.getElementById('loanTenure').value) || 0;
       const annualRate = parseFloat(document.getElementById('interestRate').value) || 0;
 
-      const result = calculateEMI(principal, annualRate, years);
-      document.getElementById('emiAmount').textContent = formatINR(result.emi);
+      let principal = 0;
+      let result = null;
+
+      if (mode === 'loan') {
+        principal = parseFloat(document.getElementById('loanAmount').value) || 0;
+        result = calculateEMI(principal, annualRate, years);
+        document.getElementById('emiAmount').textContent = formatINR(result.emi);
+        document.querySelector('.result-title').innerHTML = `You are Eligible for EMI Amount <span id="emiAmount">${formatINR(result.emi)}</span>`;
+      } else {
+        const desiredEmi = parseFloat(document.getElementById('desiredEmi').value) || 0;
+        principal = calculateLoanFromEMI(desiredEmi, annualRate, years);
+        document.getElementById('loanAmount').value = Math.round(principal);
+        result = calculateEMI(principal, annualRate, years);
+        document.querySelector('.result-title').innerHTML = `You are Eligible for Loan Amount <span id="emiAmount">${formatINR(principal)}</span>`;
+      }
+
       document.getElementById('principalAmount').textContent = formatINR(principal);
       document.getElementById('interestAmount').textContent = formatINR(result.totalInterest);
       document.getElementById('totalPayment').textContent = 'Total Payment: ' + formatINR(result.totalPayment);
@@ -304,7 +355,7 @@
       renderScheduleTable();
     }
 
-    updateCalculator();
+    handleModeChange();
   </script>
 </body>
 </html>
